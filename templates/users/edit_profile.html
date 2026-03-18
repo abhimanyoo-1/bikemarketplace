@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - BikeMarket{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px;">
+    <div class="form-container glass" style="padding: 40px; border-radius: var(--radius-lg);">
+        <h1 style="text-align: center; margin-bottom: 30px;">Update Profile</h1>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert error" style="margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light);">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light);">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light);">Phone Number</label>
+                {{ form.phone_number }}
+                {% if form.phone_number.errors %}
+                    <p style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.phone_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light);">Location (City, State)</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                    <p style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.location.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light);">Profile Photo</label>
+                <div class="file-upload-wrapper glass" style="padding: 15px; border-radius: var(--radius-sm);">
+                    {{ form.profile_photo }}
+                </div>
+                {% if form.profile_photo.errors %}
+                    <p style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.profile_photo.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button type="submit" class="btn-primary" style="width: 100%;">Save Changes</button>
+                <a href="{% url 'profile_view' %}" class="btn-outline" style="text-align: center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

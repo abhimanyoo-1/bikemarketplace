@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ user.get_full_name|default:user.username }}'s Profile - BikeMarket{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-header glass" style="display: flex; gap: 30px; align-items: center; padding: 40px; margin-bottom: 40px; border-radius: var(--radius-lg);">
+        <div class="profile-photo-container" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue);">
+            {% if user.profile_photo %}
+                <img src="{{ user.profile_photo.url }}" alt="{{ user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                <div style="width: 100%; height: 100%; background: var(--dark); display: flex; align-items: center; justify-content: center; font-size: 3rem;">👤</div>
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1 style="margin-bottom: 5px;">{{ user.get_full_name|default:user.username }}</h1>
+            <p style="color: var(--neon-blue); font-weight: 600; font-size: 1.1rem; margin-bottom: 15px;">
+                {% if user.is_verified %}Verified Seller ✓{% else %}Member{% endif %}
+            </p>
+            <div style="color: var(--text-light); font-size: 0.95rem;">
+                <p>📍 {{ user.location|default:"Location not set" }}</p>
+                <p>📞 {{ user.phone_number|default:"Phone not set" }}</p>
+                <p>📧 {{ user.email }}</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <a href="{% url 'profile_edit' %}" class="btn-outline">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 25px;">Listings by {{ user.username }}</h2>
+    <div class="bike-grid">
+        {% for bike in user_bikes %}
+            <div class="bike-card">
+                <div class="bike-img-container">
+                    {% with first_img=bike.images.first %}
+                    {% if first_img %}
+                        <img src="{{ first_img.image.url }}" alt="{{ bike.title }}" class="bike-img" loading="lazy">
+                    {% else %}
+                        <div class="bike-placeholder">📷</div>
+                    {% endif %}
+                    {% endwith %}
+                    <span class="bike-condition {{ bike.condition|lower }}">{{ bike.condition }}</span>
+                </div>
+                <div class="bike-details">
+                    <h3>{{ bike.brand }} {{ bike.model }}</h3>
+                    <p class="bike-price">₹{{ bike.price|floatformat:0 }}</p>
+                    <div class="bike-specs">
+                        {{ bike.year }} &bull; {{ bike.mileage|floatformat:0 }} km &bull; {{ bike.fuel_type }}
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">📍 {{ bike.city }}, {{ bike.state }}</p>
+                    <a href="{% url 'bike_detail' bike.pk %}" class="btn-outline">View Details →</a>
+                </div>
+            </div>
+        {% empty %}
+            <p style="color: var(--text-light); grid-column: 1/-1; text-align: center;">No listings yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

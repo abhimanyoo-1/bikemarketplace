@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ bike.brand }} {{ bike.model }} {{ bike.year }} - BikeMarket{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Breadcrumb -->
+    <p style="color: var(--text-light); margin-bottom: 20px; font-size: 0.9rem;">
+        <a href="{% url 'home' %}">Home</a> › 
+        <a href="{% url 'bike_list' %}">Browse Bikes</a> › 
+        {{ bike.brand }} {{ bike.model }}
+    </p>
+
+    <!-- Header -->
+    <div class="bike-detail-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1>{{ bike.brand }} {{ bike.model }} {{ bike.year }}</h1>
+                <p class="location-badge">📍 {{ bike.city }}, {{ bike.state }}</p>
+            </div>
+            <div style="text-align: right;">
+                <div class="detail-price">₹{{ bike.price|floatformat:0 }}</div>
+                {% if bike.negotiable %}
+                    <span style="color: var(--neon-blue); font-size: 0.9rem;">Negotiable</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid: Gallery + Seller Card -->
+    <div class="bike-detail-grid">
+        <div>
+            <!-- Image Gallery -->
+            {% with images=bike.images.all %}
+            {% if images %}
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px;">
+                    <img src="{{ images.0.image.url }}" alt="{{ bike.title }}" class="main-bike-img" id="main-img">
+                </div>
+                {% if images|length > 1 %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-bottom: 20px;">
+                    {% for img in images %}
+                    <img src="{{ img.image.url }}" alt="Bike photo {{ forloop.counter }}"
+                         style="width: 100%; height: 80px; object-fit: cover; border-radius: var(--radius-sm); cursor: none; border: 2px solid var(--gray-border); transition: var(--transition);"
+                         onclick="document.getElementById('main-img').src = this.src;"
+                         onmouseover="this.style.borderColor='var(--neon-blue)'"
+                         onmouseout="this.style.borderColor='var(--gray-border)'">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="main-bike-placeholder">📷 No photos available</div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Video Player -->
+            {% if bike.video %}
+            <div style="margin-bottom: 30px;">
+                <h3>Video</h3>
+                <video controls style="width: 100%; border-radius: var(--radius); border: 1px solid var(--gray-border);">
+                    <source src="{{ bike.video.url }}">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Seller Card -->
+        <div>
+            <div class="seller-card" style="position: sticky; top: 100px;">
+                <h3>Seller Information</h3>
+                <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">
+                    {{ bike.seller.get_full_name|default:bike.seller.email }}
+                    {% if bike.seller.is_verified %}
+                        <span style="color: var(--neon-blue); font-size: 0.85rem;">✓ Verified</span>
+                    {% endif %}
+                </p>
+                {% if bike.seller.location %}
+                    <p style="color: var(--text-light); margin-bottom: 15px;">📍 {{ bike.seller.location }}</p>
+                {% endif %}
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <a href="{% url 'contact_seller' bike.pk %}" class="btn-primary w-100" style="text-align: center;">Contact Seller</a>
+                    {% if bike.seller.phone_number %}
+                    <a href="https://wa.me/{{ bike.seller.phone_number }}" target="_blank" class="btn-secondary w-100" style="text-align: center;">💬 WhatsApp</a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'toggle_favorite' bike.pk %}" class="btn-outline w-100" style="text-align: center;">
+                        {% if is_favorited %}❤️ Saved{% else %}🤍 Save Bike{% endif %}
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="padding-top: 15px; border-top: 1px solid var(--gray-border); font-size: 0.9rem; color: var(--text-light);">
+                    <p>Listed: {{ bike.created_at|date:"d M Y" }}</p>
+                    <p>Status: <span style="color: 
+                        {% if bike.status == 'Approved' %}var(--neon-blue)
+                        {% elif bike.status == 'Sold' %}#EF4444
+                        {% else %}var(--neon-purple){% endif %};">
+                        {{ bike.status }}
+                    </span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specs Grid -->
+    <h2 style="margin-bottom: 20px;">Specifications</h2>
+    <div class="specs-grid" style="margin-bottom: 40px;">
+        <div class="spec-item">
+            <span class="spec-label">Engine</span>
+            <span class="spec-value">{{ bike.engine_cc|default:"N/A" }} CC</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Mileage</span>
+            <span class="spec-value">{{ bike.mileage }} km</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Fuel Type</span>
+            <span class="spec-value">{{ bike.fuel_type }}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Condition</span>
+            <span class="spec-value">{{ bike.condition }}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Year</span>
+            <span class="spec-value">{{ bike.year }}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Ownership</span>
+            <span class="spec-value">{{ bike.ownership_number }}{% if bike.ownership_number == 1 %}st{% elif bike.ownership_number == 2 %}nd{% else %}rd{% endif %} owner</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Reg. State</span>
+            <span class="spec-value">{{ bike.registration_state|default:"N/A" }}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Insurance</span>
+            <span class="spec-value">{{ bike.insurance_validity|date:"M Y"|default:"N/A" }}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Service History</span>
+            <span class="spec-value">{% if bike.service_history %}✓ Available{% else %}✗ Not available{% endif %}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Accident History</span>
+            <span class="spec-value">{% if bike.accident_history %}⚠ Yes{% else %}✓ None{% endif %}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Warranty</span>
+            <span class="spec-value">{% if bike.warranty_remaining %}✓ Remaining{% else %}✗ None{% endif %}</span>
+        </div>
+        <div class="spec-item">
+            <span class="spec-label">Location</span>
+            <span class="spec-value">{{ bike.city }}, {{ bike.state }}</span>
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="bike-description-section" style="margin-bottom: 40px;">
+        <h2 style="margin-bottom: 15px;">Description</h2>
+        <div class="form-container" style="max-width: 100%;">
+            <p style="color: var(--text-light); line-height: 1.9; white-space: pre-line;">{{ bike.description }}</p>
+            {% if bike.modifications %}
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gray-border);">
+                <h4 style="margin-bottom: 10px;">Modifications</h4>
+                <p style="color: var(--text-light);">{{ bike.modifications }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

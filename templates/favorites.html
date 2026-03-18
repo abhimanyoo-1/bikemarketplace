@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}My Favorites - BikeMarket{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+        <div>
+            <h1 style="margin-bottom: 5px;">My Favorites</h1>
+            <p style="color: var(--text-light);">{{ favorites|length }} saved bike{{ favorites|length|pluralize }}</p>
+        </div>
+        <a href="{% url 'bike_list' %}" class="btn-outline">Browse More →</a>
+    </div>
+
+    {% if favorites %}
+    <div class="bike-grid">
+        {% for fav in favorites %}
+        <div class="bike-card">
+            <div class="bike-img-container">
+                {% with first_img=fav.bike.images.first %}
+                {% if first_img %}
+                    <img src="{{ first_img.image.url }}" alt="{{ fav.bike.title }}" class="bike-img" loading="lazy">
+                {% else %}
+                    <div class="bike-placeholder">📷</div>
+                {% endif %}
+                {% endwith %}
+                <span class="bike-condition {{ fav.bike.condition|lower }}">{{ fav.bike.condition }}</span>
+            </div>
+            <div class="bike-details">
+                <h3>{{ fav.bike.brand }} {{ fav.bike.model }}</h3>
+                <p class="bike-price">₹{{ fav.bike.price|floatformat:0 }}</p>
+                <div class="bike-specs">
+                    {{ fav.bike.year }} &bull; {{ fav.bike.mileage|floatformat:0 }} km &bull; {{ fav.bike.fuel_type }}
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">📍 {{ fav.bike.city }}, {{ fav.bike.state }}</p>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'bike_detail' fav.bike.pk %}" class="btn-outline" style="flex: 1; text-align: center;">View →</a>
+                    <a href="{% url 'toggle_favorite' fav.bike.pk %}" class="btn-secondary" style="padding: 10px 14px;" title="Remove from favorites">🗑</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p style="font-size: 2.5rem; margin-bottom: 10px;">❤️</p>
+        <h2>No saved bikes yet</h2>
+        <p style="margin-bottom: 25px;">Browse listings and click "Save" to add bikes to your favorites.</p>
+        <a href="{% url 'bike_list' %}" class="btn-primary">Browse Bikes</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

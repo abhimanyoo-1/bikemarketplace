@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Contact Seller</h2>
+    <p>Send an inquiry to the owner of <strong>{{ bike.title }}</strong>.</p>
+    
+    <div class="bike-summary-card">
+        <div class="summary-img">
+            {% if bike.image %}
+                <img src="{{ bike.image.url }}" alt="{{ bike.title }}">
+            {% else %}
+                <div class="small-placeholder">No Image</div>
+            {% endif %}
+        </div>
+        <div class="summary-details">
+            <h4>{{ bike.title }}</h4>
+            <p>${{ bike.price }}</p>
+        </div>
+    </div>
+    
+    <form method="post" class="standard-form mt-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn-primary w-100 mt-3">Send Inquiry</button>
+        <a href="{% url 'bike_detail' bike.pk %}" class="btn-outline w-100 text-center mt-2" style="display:block;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

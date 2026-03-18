@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Superbikes - BikeMarket{% endblock %}
+
+{% block content %}
+<div class="listing-page">
+    <!-- Filters -->
+    <aside class="filters">
+        <h3 style="margin-bottom: 20px;">Filter Bikes</h3>
+        <form method="get" action="{% url 'bike_list' %}" class="filter-form">
+            <div class="form-group">
+                <label for="brand">Brand</label>
+                <input type="text" id="brand" name="brand" value="{{ request.GET.brand }}" placeholder="e.g. Yamaha">
+            </div>
+            <div class="form-group">
+                <label for="min_price">Min Price (₹)</label>
+                <input type="number" id="min_price" name="min_price" value="{{ request.GET.min_price }}" placeholder="e.g. 100000">
+            </div>
+            <div class="form-group">
+                <label for="max_price">Max Price (₹)</label>
+                <input type="number" id="max_price" name="max_price" value="{{ request.GET.max_price }}" placeholder="e.g. 1500000">
+            </div>
+            <div class="form-group">
+                <label for="fuel_type">Fuel Type</label>
+                <select id="fuel_type" name="fuel_type">
+                    <option value="">All</option>
+                    <option value="Petrol" {% if request.GET.fuel_type == 'Petrol' %}selected{% endif %}>Petrol</option>
+                    <option value="Electric" {% if request.GET.fuel_type == 'Electric' %}selected{% endif %}>Electric</option>
+                    <option value="Diesel" {% if request.GET.fuel_type == 'Diesel' %}selected{% endif %}>Diesel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="condition">Condition</label>
+                <select id="condition" name="condition">
+                    <option value="">All</option>
+                    <option value="Excellent" {% if request.GET.condition == 'Excellent' %}selected{% endif %}>Excellent</option>
+                    <option value="Good" {% if request.GET.condition == 'Good' %}selected{% endif %}>Good</option>
+                    <option value="Fair" {% if request.GET.condition == 'Fair' %}selected{% endif %}>Fair</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sort">Sort By</label>
+                <select id="sort" name="sort">
+                    <option value="" {% if not request.GET.sort %}selected{% endif %}>Newest First</option>
+                    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Price: Low → High</option>
+                    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Price: High → Low</option>
+                    <option value="mileage_asc" {% if request.GET.sort == 'mileage_asc' %}selected{% endif %}>Mileage: Low → High</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary w-100">Apply Filters</button>
+            <a href="{% url 'bike_list' %}" class="btn-outline w-100 text-center" style="margin-top: 10px; display: block;">Clear Filters</a>
+        </form>
+    </aside>
+
+    <!-- Results -->
+    <div class="bike-results">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2>Available Bikes <span style="color: var(--text-light); font-size: 1rem; font-weight: 400;">({{ bikes|length }} results)</span></h2>
+        </div>
+        <div class="bike-grid">
+            {% for bike in bikes %}
+                <div class="bike-card">
+                    <div class="bike-img-container">
+                        {% with first_img=bike.images.first %}
+                        {% if first_img %}
+                            <img src="{{ first_img.image.url }}" alt="{{ bike.title }}" class="bike-img" loading="lazy">
+                        {% else %}
+                            <div class="bike-placeholder">📷 No Photo</div>
+                        {% endif %}
+                        {% endwith %}
+                        <span class="bike-condition {{ bike.condition|lower }}">{{ bike.condition }}</span>
+                    </div>
+                    <div class="bike-details">
+                        <h3>{{ bike.brand }} {{ bike.model }}</h3>
+                        <p class="bike-price">₹{{ bike.price|floatformat:0 }}
+                            {% if bike.negotiable %}<span style="font-size: 0.75rem; color: var(--neon-blue); font-weight: 400;"> · Negotiable</span>{% endif %}
+                        </p>
+                        <div class="bike-specs">
+                            {{ bike.year }} &bull; {{ bike.mileage|floatformat:0 }} km &bull; {{ bike.fuel_type }}
+                            {% if bike.engine_cc %}&bull; {{ bike.engine_cc }}cc{% endif %}
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">📍 {{ bike.city }}, {{ bike.state }}</p>
+                        <a href="{% url 'bike_detail' bike.pk %}" class="btn-outline">View Details →</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🏍️</p>
+                    <h3>No bikes found</h3>
+                    <p>Try adjusting your filters or <a href="{% url 'bike_list' %}">clear all filters</a>.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

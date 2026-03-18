@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecondHand Bike Marketplace{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="{% url 'home' %}" class="brand">BikeMarket</a>
+            <form action="{% url 'bike_list' %}" method="GET" class="nav-search-form" style="flex: 1; max-width: 400px; margin: 0 20px;">
+                <input type="text" name="q" placeholder="Search brand, model, city..." class="form-input" style="height: 38px; border-radius: 20px; padding: 0 20px;" value="{{ request.GET.q }}">
+            </form>
+            <div class="nav-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'bike_list' %}">Browse Bikes</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'sell_bike' %}" class="btn-primary">Sell Your Bike</a>
+                    <a href="{% url 'favorites_list' %}">Favorites</a>
+                    <a href="{% url 'user_dashboard' %}">Dashboard</a>
+                    <a href="{% url 'profile_view' %}">Profile</a>
+                    <form method="post" action="{% url 'account_logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; color: var(--text); font-family: inherit; font-size: 1rem; cursor: none; font-weight: 500;">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'account_login' %}" style="margin-right: -10px;">Sign In</a>
+                    <a href="{% url 'account_signup' %}" class="btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 SecondHand Bike Marketplace. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursor = document.getElementById('custom-cursor');
+            
+            // Only enable on desktop or if pointer matches
+            if (window.matchMedia("(pointer: fine)").matches) {
+                document.addEventListener('mousemove', (e) => {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                });
+                
+                const interactiveElements = document.querySelectorAll('a, button, input, select, textarea, .bike-card');
+                
+                interactiveElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        cursor.classList.add('cursor-hover');
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        cursor.classList.remove('cursor-hover');
+                    });
+                });
+            } else {
+                cursor.style.display = 'none'; // Hide if touch device
+            }
+        });
+    </script>
+</body>
+</html>
